@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>绿修技研™ | 新能源维修工具箱</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px; color: #1e2a3a; }
+        .container { max-width: 600px; width: 100%; background: #ffffff; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); padding: 30px 20px; margin-bottom: 20px; }
+        
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 1.8rem; color: #0b2b4e; font-weight: 800; margin-bottom: 8px; }
+        .header p { font-size: 1rem; color: #5e7a99; }
+        
+        .tool-card { background: #f9fcff; border: 1px solid #e2eaf2; border-radius: 20px; padding: 20px; margin-bottom: 16px; display: flex; align-items: center; text-decoration: none; color: inherit; transition: transform 0.1s; }
+        .tool-card:active { transform: scale(0.98); background: #f0f6fc; }
+        .tool-icon { width: 50px; height: 50px; background: #1e6bb8; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: white; margin-right: 16px; }
+        .tool-info h2 { font-size: 1.25rem; font-weight: 700; color: #0b2b4e; margin-bottom: 4px; }
+        .tool-info p { font-size: 0.9rem; color: #6986a3; }
+        
+        /* 引流区样式 */
+        .qr-section { display: flex; flex-direction: column; align-items: center; background: #f8fafc; padding: 20px; border-radius: 20px; margin-top: 30px; border: 1px solid #e2eaf2; }
+        .qr-tips { font-size: 0.95rem; color: #1e6bb8; font-weight: 700; margin-bottom: 10px; text-align: center; }
+        .qr-image { width: 160px; height: 160px; background: #eef2f6; border-radius: 16px; border: 2px dashed #cbd5e1; overflow: hidden; }
+        .qr-image img { width: 100%; height: 100%; object-fit: contain; }
+        .qr-caption { font-size: 0.9rem; color: #3b4e62; margin-top: 12px; font-weight: 500; text-align: center; line-height: 1.5; }
+        
+        .footer { text-align: center; font-size: 0.85rem; color: #94a3b8; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>绿修技研™ 工具箱</h1>
+            <p>专为新能源维修师傅打造</p>
+        </div>
+
+        <!-- 工具列表 -->
+        <a href="jueyuan.html" class="tool-card">
+            <div class="tool-icon">⚡</div>
+            <div class="tool-info">
+                <h2>绝缘电阻计算器</h2>
+                <p>国标判定与现场经验分级</p>
+            </div>
+        </a>
+
+        <!-- 预留：高压互锁工具 -->
+        <div class="tool-card" style="opacity: 0.5; pointer-events: none;">
+            <div class="tool-icon" style="background: #94a3b8;">🔌</div>
+            <div class="tool-info">
+                <h2>高压互锁针脚查询</h2>
+                <p>即将上线，敬请期待...</p>
+            </div>
+        </div>
+
+        <!-- 引流区 -->
+        <div class="qr-section">
+            <div class="qr-tips">💡 需要维修资料或技术咨询？</div>
+            <div class="qr-image">
+                <img src="img/wechat-qr.jpg" alt="微信二维码">
+            </div>
+            <div class="qr-caption">保存二维码，打开微信扫一扫<br>添加“绿修技研”获取帮助</div>
+        </div>
+    </div>
+    
+    <div class="footer">绿修技研 · 让修车更简单</div>
+</body>
+</html>
