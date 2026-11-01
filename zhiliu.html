@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>绿修技研™ | 直流充电故障排查向导</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px; color: #1e2a3a; }
+        .app-container { max-width: 600px; width: 100%; background: #ffffff; border-radius: 24px; padding: 24px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .main-title { font-size: 1.5rem; font-weight: 800; color: #0b2b4e; text-align: center; margin-bottom: 10px; }
+        .sub-title { text-align: center; color: #e67e22; font-weight: 700; margin-bottom: 20px; font-size: 1rem; }
+        
+        /* 步骤卡片 */
+        .step-card { background: #f9fcff; border: 1px solid #e2eaf2; border-radius: 16px; padding: 18px; margin-bottom: 16px; position: relative; }
+        .step-title { font-size: 1.15rem; font-weight: 800; color: #1e6bb8; margin-bottom: 10px; border-bottom: 1px dashed #cbdae9; padding-bottom: 8px; }
+        .step-content { font-size: 1rem; color: #1e2a3a; line-height: 1.6; }
+        .step-content b { color: #c0392b; }
+        
+        /* 表格样式 */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; background: #fff; }
+        .data-table th, .data-table td { border: 1px solid #dae5f0; padding: 8px; text-align: left; }
+        .data-table th { background: #eaf3fb; color: #1e6bb8; }
+        
+        /* 口诀卡片 */
+        .mnemonic { background: #fff4d2; border-left: 4px solid #e67e22; padding: 16px; border-radius: 8px; font-weight: 700; color: #5a4500; line-height: 1.8; font-size: 1rem; margin-bottom: 20px; }
+
+        /* 折叠面板 */
+        details { background: #f8fafc; border: 1px solid #e2eaf2; border-radius: 14px; padding: 12px 16px; margin-bottom: 16px; }
+        summary { font-size: 1rem; font-weight: 700; color: #1e6bb8; cursor: pointer; outline: none; }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: '▶'; font-size: 0.8rem; margin-right: 8px; }
+        details[open] summary::before { transform: rotate(90deg); display: inline-block; }
+        .detail-content { margin-top: 12px; font-size: 0.95rem; color: #4a637b; line-height: 1.6; border-top: 1px dashed #cbdae9; padding-top: 12px; }
+
+        /* 引流转化卡 */
+        .callout-box { background: #ffe8cc; border-left: 6px solid #e67e22; padding: 16px; border-radius: 12px; margin: 20px 0; }
+        .callout-box h3 { font-size: 1.05rem; color: #7a3c00; font-weight: 800; margin-bottom: 6px; }
+        .callout-box p { font-size: 0.95rem; color: #7a3c00; line-height: 1.5; margin-bottom: 12px;}
+
+        .back-btn { display: block; text-align: center; margin-top: 20px; color: #1e6bb8; text-decoration: none; font-weight: 700; padding: 12px; background: #eaf3fb; border-radius: 12px; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <h1 class="main-title">直流快充故障排查向导</h1>
+    <div class="sub-title">绿修技研 · 车间实战 SOP</div>
+    
+    <!-- 现场口诀最醒目 -->
+    <div class="mnemonic">
+        📌 现场速记口诀：<br>
+        拔枪 CC2 十二伏，插枪六伏就靠谱；<br>
+        枪头 CC2 一千欧，车端 CC1 也是它；<br>
+        CAN 之间六十欧，两三点儿五是常态；<br>
+        预充电压慢慢爬，一下到顶继电器粘；<br>
+        冷热阻值不一样，针脚氧化跑不了。
+    </div>
+
+    <!-- 第1步 -->
+    <div class="step-card">
+        <div class="step-title">Step 1：区分是“车不行”还是“桩不行”</div>
+        <div class="step-content">
+            1. 用诊断仪读取 BMS、VCU 故障码。<br>
+            2. <b>换 2~3 个不同品牌的充电桩测试</b>。如果别的桩能充，说明是桩的问题或协议兼容问题（挑桩）；如果所有桩都不行，进入下一步查车。
+        </div>
+    </div>
+
+    <!-- 第2步 -->
+    <div class="step-card">
+        <div class="step-title">Step 2：查低压控制信号 (CC1/CC2)</div>
+        <div class="step-content">
+            拔枪测车端 CC1↔PE 电阻（正常 1kΩ）。<br>
+            测车端 CC2↔PE 电压：<br>
+            - <b>拔枪：</b>应测到 12V（11.2~12.8V）<br>
+            - <b>插枪：</b>应测到 6V（5.2~6.8V）<br>
+            *注意：拔枪状态千万别用电阻档测车端 CC2，因为有 12V 上拉，测不准！*
+        </div>
+    </div>
+
+    <!-- 第3步 -->
+    <div class="step-card">
+        <div class="step-title">Step 3：查通讯 (CAN总线)</div>
+        <div class="step-content">
+            下电休眠状态下，测 S+(CANH) ↔ S-(CANL) 电阻：<b>必须是 60Ω</b>。<br>
+            如果测出 120Ω，说明一端终端电阻断路；无穷大说明 CAN 线断了。<br>
+            上电状态下，测 CANH 电压约 2.5~3.5V，CANL 约 1.5~2.5V。
+        </div>
+    </div>
+
+    <!-- 第4步 -->
+    <div class="step-card">
+        <div class="step-title">Step 4：查高压与预充 (⚠️ 注意高压安全)</div>
+        <div class="step-content">
+            插枪握手后，看诊断仪母线电压数据：<br>
+            - 如果电压 <b>从 0V 慢慢上升</b>到电池总压，正常。<br>
+            - 如果瞬间冲到电池总压，说明主继电器粘连。<br>
+            - 如果一直不动，查预充继电器或预充电阻是否烧毁。
+        </div>
+    </div>
+
+    <!-- 进阶测量数据表（折叠起来，避免太占屏幕） -->
+    <details>
+        <summary>点开查看：标准针脚电压/电阻测量数据表</summary>
+        <div class="detail-content">
+            <p style="margin-bottom: 8px;"><b>现象1：插枪后不认枪（查 CC2 回路）</b></p>
+            <table class="data-table">
+                <tr><th>测量点</th><th>状态</th><th>正常值</th></tr>
+                <tr><td>车端 CC2↔PE 电压</td><td>不拔枪</td><td>6V</td></tr>
+                <tr><td>车端 CC2↔PE 电压</td><td>拔枪</td><td>12V</td></tr>
+                <tr><td>枪头 CC2↔PE 电阻</td><td>拔枪</td><td>1kΩ</td></tr>
+            </table>
+            <p style="margin-top: 12px; margin-bottom: 8px;"><b>现象2：认枪但不握手（查 CAN 线）</b></p>
+            <table class="data-table">
+                <tr><th>测量点</th><th>状态</th><th>正常值</th></tr>
+                <tr><td>S+(CANH)↔S-(CANL)</td><td>下电休眠</td><td>60Ω</td></tr>
+                <tr><td>CANH↔PE</td><td>下电</td><td>不导通</td></tr>
+            </table>
+        </div>
+    </details>
+
+    <!-- 电路图预留位（折叠） -->
+    <details>
+        <summary>点开查看：CC1/CC2 控制导引回路简图</summary>
+        <div class="detail-content">
+            <div style="background: #e2eaf2; padding: 20px; text-align: center; border-radius: 8px; color: #6986a3; margin-bottom: 10px;">
+                [这里以后可以插入你截图的清晰电路图]
+            </div>
+            <p style="font-size: 0.85rem; color: #94a3b8;">* 看懂这张图，需要理解分压原理和车桩交互时序。</p>
+        </div>
+    </details>
+
+    <!-- 终极引流钩子 -->
+    <div class="callout-box">
+        <h3>⚠️ 遇到报文交互锁死？</h3>
+        <p>如果按上述步骤查了都正常，但就是无法充电，大概率是 BMS 与 OBC 底层报文交互问题，需要用 CAN 盒抓包解析。</p>
+        <p><b>想系统学习底层报文解析与高压维修逻辑？</b></p>
+        <a href="img/wechat-qr.jpg" style="display: block; text-align: center; background: #e67e22; color: white; text-decoration: none; font-weight: 700; padding: 12px; border-radius: 10px; font-size: 1rem;">保存二维码，加微信获取资料</a>
+    </div>
+
+    <a href="index.html" class="back-btn">← 返回工具箱首页</a>
+</div>
+</body>
+</html>
