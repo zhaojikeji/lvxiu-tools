@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>绿修技研™ | NTC温度阻值速查</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px; color: #1e2a3a; }
+        .app-container { max-width: 600px; width: 100%; background: #ffffff; border-radius: 24px; padding: 24px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .main-title { font-size: 1.5rem; font-weight: 800; color: #0b2b4e; text-align: center; margin-bottom: 20px; }
+        
+        .input-group { background: #f9fcff; border-radius: 16px; padding: 16px; margin-bottom: 20px; border: 1px solid #e2eaf2; }
+        .input-group label { font-size: 1.05rem; font-weight: 700; color: #1d3c5e; display: block; margin-bottom: 8px; }
+        .input-group select { width: 100%; padding: 14px; font-size: 1.1rem; font-weight: 600; border: 2px solid #cbdae9; border-radius: 12px; background: #ffffff; outline: none; color: #0b2b4e; -webkit-appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231e6bb8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>"); background-repeat: no-repeat; background-position: right 12px center; background-size: 20px; }
+        
+        .result-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 1.05rem; display: none; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .result-table th, .result-table td { border: 1px solid #dae5f0; padding: 12px 8px; }
+        .result-table th { background: #eaf3fb; color: #1e6bb8; font-weight: 700; }
+        .result-table tr:nth-child(even) { background: #f8fbfd; }
+        
+        .notice { color: #6986a3; font-size: 0.95rem; text-align: center; margin-top: 15px; padding: 10px; background: #f0f6fc; border-radius: 10px; }
+        .tips { background: #fff4d2; color: #5a4500; padding: 14px; border-radius: 14px; font-size: 0.95rem; margin-top: 20px; border: 1px solid #c9a227; line-height: 1.6; }
+        
+        .back-btn { display: block; text-align: center; margin-top: 20px; color: #1e6bb8; text-decoration: none; font-weight: 700; font-size: 1rem; padding: 12px; background: #eaf3fb; border-radius: 12px; }
+        .back-btn:active { background: #d9e9fb; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <h1 class="main-title">NTC 温度阻值速查</h1>
+    
+    <div class="input-group">
+        <label>选择传感器 / 车型参考</label>
+        <select id="carModel" onchange="updateTable()">
+            <option value="">-- 请选择 --</option>
+            <optgroup label="通用参考 (空调/常温)">
+                <option value="gen_10k">通用标准 (10kΩ B=3435)</option>
+            </optgroup>
+            <optgroup label="三电系统 (电池/电机)">
+                <option value="byd_motor">比亚迪 e5/秦 (驱动电机)</option>
+                <option value="geely_motor">吉利帝豪 EV450 (驱动电机)</option>
+                <option value="kia_battery">起亚 Niro (电池完整参考)</option>
+            </optgroup>
+        </select>
+    </div>
+
+    <table class="result-table" id="dataTable">
+        <thead>
+            <tr>
+                <th>温度 (℃)</th>
+                <th>标准阻值 (kΩ)</th>
+                <th>备注/误差</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+    
+    <div id="placeholder" class="notice">请在上方下拉选择要查询的传感器</div>
+
+    <div class="tips" id="tipsBox">
+        💡 <b>维修提示：</b><br>
+        1. 测量前请断开插头，注意万用表量程。<br>
+        2. 常温下（约25℃）测量最为准确。<br>
+        3. 若阻值偏离过多或加热无变化，说明传感器已损坏。
+    </div>
+
+    <a href="index.html" class="back-btn">← 返回工具箱首页</a>
+</div>
+
+<script>
+    const ntcData = {
+        'gen_10k': {
+            title: '通用 10k B=3435',
+            tips: '适用于大多数新能源车空调蒸发器、车外环境及部分冷却液温度传感器。',
+            data: [
+                { temp: '0',   val: '27.0 - 28.5',  note: '冰水混合物' },
+                { temp: '10',  val: '17.8 - 18.4',  note: '' },
+                { temp: '20',  val: '12.0 - 12.8',  note: '室温' },
+                { temp: '25',  val: '10.0',         note: '标准基准点' },
+                { temp: '40',  val: '5.3 - 5.8',    note: '温热' },
+                { temp: '60',  val: '2.4 - 2.7',    note: '热车' },
+                { temp: '85',  val: '1.0 - 1.2',    note: '高温' }
+            ]
+        },
+        'byd_motor': {
+            title: '比亚迪 e5/秦 电机',
+            tips: '测量前确认环境温度。若在10-40℃范围内，阻值异常则大概率传感器损坏。',
+            data: [
+                { temp: '0',   val: '364.9',  note: '阻值极高' },
+                { temp: '10',  val: '212.5',  note: '' },
+                { temp: '20',  val: '127.7',  note: '' },
+                { temp: '30',  val: '78.88',  note: '' },
+                { temp: '40',  val: '50.04',  note: '阻值下降快' }
+            ]
+        },
+        'geely_motor': {
+            title: '吉利帝豪 EV450 电机',
+            tips: '注意：低温(-40℃)阻值极小，测量时务必注意万用表量程切换！',
+            data: [
+                { temp: '-40', val: '0.221 - 0.261', note: '极低阻值' },
+                { temp: '20',  val: '12.8 - 14.4',   note: '正常室温' },
+                { temp: '85',  val: '1.5 - 1.7',     note: '高温状态' }
+            ]
+        },
+        'kia_battery': {
+            title: '起亚 Niro 电池 (10k参考)',
+            tips: '非常标准的10k NTC曲线，可作为多数电池包内部温度传感器的参考。',
+            data: [
+                { temp: '-20', val: '65.82 - 69.77', note: '' },
+                { temp: '0',   val: '26.74 - 27.83', note: '' },
+                { temp: '10',  val: '17.67 - 18.25', note: '' },
+                { temp: '20',  val: '11.94 - 12.24', note: '' },
+                { temp: '30',  val: '8.21 - 8.41',   note: '' },
+                { temp: '40',  val: '5.73 - 5.91',   note: '' }
+            ]
+        }
+    };
+
+    function updateTable() {
+        const model = document.getElementById('carModel').value;
+        const table = document.getElementById('dataTable');
+        const tbody = document.getElementById('tableBody');
+        const placeholder = document.getElementById('placeholder');
+        const tipsBox = document.getElementById('tipsBox');
+
+        if (!model) {
+            table.style.display = 'none';
+            placeholder.style.display = 'block';
+            tipsBox.innerHTML = '💡 <b>维修提示：</b><br>1. 测量前请断开插头，注意万用表量程。<br>2. 常温下（约25℃）测量最为准确。<br>3. 若阻值偏离过多或加热无变化，说明传感器已损坏。';
+            return;
+        }
+
+        tbody.innerHTML = ''; 
+        const currentData = ntcData[model];
+        if(currentData) {
+            currentData.data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${row.temp}</td><td>${row.val}</td><td>${row.note}</td>`;
+                tbody.appendChild(tr);
+            });
+            table.style.display = 'table';
+            placeholder.style.display = 'none';
+            
+            tipsBox.innerHTML = `💡 <b>${currentData.title} 提示：</b><br>${currentData.tips}`;
+        }
+    }
+</script>
+</body>
+</html>
