@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>绿修技研™ | 电池单体压差计算器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px; color: #1e2a3a; }
+        .app-container { max-width: 600px; width: 100%; background: #ffffff; border-radius: 24px; padding: 24px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .main-title { font-size: 1.5rem; font-weight: 800; color: #0b2b4e; text-align: center; margin-bottom: 20px; }
+        
+        .input-group { background: #f9fcff; border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid #e2eaf2; }
+        .input-group label { font-size: 1.05rem; font-weight: 700; color: #1d3c5e; display: block; margin-bottom: 8px; }
+        .input-group input { width: 100%; padding: 14px; font-size: 1.2rem; font-weight: 600; border: 2px solid #cbdae9; border-radius: 12px; outline: none; color: #0b2b4e; text-align: right; }
+        
+        .calc-btn { width: 100%; background: #1e6bb8; border: none; color: white; font-size: 1.4rem; font-weight: 700; padding: 18px; border-radius: 16px; cursor: pointer; margin: 10px 0 20px; }
+        .calc-btn:active { background: #15518f; }
+        
+        .result-box { background: #f1f6fb; border-radius: 16px; padding: 20px; text-align: center; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .result-box.green { background: #e1f7e7; color: #1a4a2e; border: 1px solid #2e8b57; }
+        .result-box.yellow { background: #fff4d2; color: #5a4500; border: 1px solid #c9a227; }
+        .result-box.orange { background: #ffe8cc; color: #7a3c00; border: 1px solid #e67e22; }
+        .result-box.red { background: #ffe3e0; color: #6b1a12; border: 1px solid #c0392b; }
+        
+        .result-val { font-size: 2.2rem; font-weight: 800; margin: 10px 0; }
+        .result-text { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
+        .result-sub { font-size: 0.95rem; opacity: 0.85; line-height: 1.5; }
+        
+        /* 折叠面板样式 */
+        details { background: #f8fafc; border: 1px solid #e2eaf2; border-radius: 14px; padding: 12px 16px; margin-top: 20px; }
+        summary { font-size: 1rem; font-weight: 700; color: #1e6bb8; cursor: pointer; outline: none; display: flex; align-items: center; }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: '▶'; font-size: 0.8rem; margin-right: 8px; transition: transform 0.2s; }
+        details[open] summary::before { transform: rotate(90deg); }
+        .detail-content { margin-top: 12px; font-size: 0.9rem; color: #5e7a99; line-height: 1.6; border-top: 1px dashed #cbdae9; padding-top: 12px; }
+        .detail-content ul { padding-left: 20px; margin-bottom: 10px; }
+        .detail-content li { margin-bottom: 6px; }
+
+        .back-btn { display: block; text-align: center; margin-top: 20px; color: #1e6bb8; text-decoration: none; font-weight: 700; padding: 12px; background: #eaf3fb; border-radius: 12px; }
+        .back-btn:active { background: #d9e9fb; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <h1 class="main-title">电池单体压差计算</h1>
+    
+    <div class="input-group">
+        <label>最高单体电压 (V)</label>
+        <input type="number" id="maxV" step="0.001" placeholder="例如: 3.325">
+    </div>
+    <div class="input-group">
+        <label>最低单体电压 (V)</label>
+        <input type="number" id="minV" step="0.001" placeholder="例如: 3.150">
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">计算压差</button>
+
+    <div class="result-box" id="resultBox">
+        <div class="result-text">单体压差</div>
+        <div class="result-val" id="diffVal">-- mV</div>
+        <div class="result-text" id="diffStatus">--</div>
+        <div class="result-sub" id="diffSub"></div>
+    </div>
+
+    <!-- 专业知识折叠面板 -->
+    <details>
+        <summary>查看压差判定依据与行业标准</summary>
+        <div class="detail-content">
+            <p><b>1. 通用静态压差判定 (BMS未报码)：</b></p>
+            <ul>
+                <li><b>&lt; 30mV</b>：极佳，电池一致性非常好。</li>
+                <li><b>30mV - 100mV</b>：轻微老化或轻微不均衡，建议继续观察，下次保养做均衡。</li>
+                <li><b>100mV - 350mV</b>：压差明显偏大，可能伴随续航缩水，需排查落后单体。</li>
+                <li><b>&gt; 350mV</b>：严重故障，通常BMS会亮黄色/红色故障灯或限制功率。</li>
+            </ul>
+            <p><b>2. 不同材料电池差异：</b></p>
+            <ul>
+                <li><b>三元锂电池：</b>压差 &gt; 120mV 即视为异常。</li>
+                <li><b>磷酸铁锂（如刀片电池）：</b>电压平台平缓，压差 &gt; 150mV 即视为异常。</li>
+            </ul>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 10px;">*注：以上为行业通用参考，具体判定请以各车企最新维修手册为准。动态（行驶/充放电）状态下的压差通常会比静态更大。</p>
+        </div>
+    </details>
+
+    <a href="index.html" class="back-btn">← 返回工具箱首页</a>
+</div>
+
+<script>
+    function calculate() {
+        const maxStr = document.getElementById('maxV').value;
+        const minStr = document.getElementById('minV').value;
+        const resultBox = document.getElementById('resultBox');
+        const diffVal = document.getElementById('diffVal');
+        const diffStatus = document.getElementById('diffStatus');
+        const diffSub = document.getElementById('diffSub');
+
+        const max = parseFloat(maxStr);
+        const min = parseFloat(minStr);
+
+        if (isNaN(max) || isNaN(min) || max <= 0 || min <= 0) {
+            alert("请输入有效的电压值（大于0的数字）");
+            return;
+        }
+        if (max <= min) {
+            alert("最高单体电压不能小于或等于最低单体电压！");
+            return;
+        }
+
+        // 计算压差 (单位：mV)，四舍五入取整
+        const diff_mV = Math.round((max - min) * 1000);
+        diffVal.textContent = diff_mV + " mV";
+        resultBox.style.display = 'block';
+
+        // 逻辑判定
+        if (diff_mV < 30) {
+            resultBox.className = 'result-box green';
+            diffStatus.textContent = '✅ 压差极小，电池状态极佳';
+            diffSub.textContent = '无需处理，继续保持。';
+        } else if (diff_mV >= 30 && diff_mV <= 100) {
+            resultBox.className = 'result-box yellow';
+            diffStatus.textContent = '🟡 轻微偏大，建议观察';
+            diffSub.textContent = '多为正常老化，建议下次保养时做一次慢充均衡。';
+        } else if (diff_mV > 100 && diff_mV <= 350) {
+            resultBox.className = 'result-box orange';
+            diffStatus.textContent = '🟠 压差较大，需重点排查';
+            diffSub.textContent = '可能伴随续航缩水，建议排查落后单体或检查均衡系统（注：三元锂/铁锂标准有差异，详见下方依据）。';
+        } else {
+            resultBox.className = 'result-box red';
+            diffStatus.textContent = '❌ 严重故障，BMS应已报警';
+            diffSub.textContent = '压差极大，存在热失控隐患，车辆可能出现功率限制，建议立即检修。';
+        }
+    }
+</script>
+</body>
+</html>
