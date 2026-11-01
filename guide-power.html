@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>绿修技研™ | 高压不上电排查向导</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px; color: #1e2a3a; }
+        .app-container { max-width: 600px; width: 100%; background: #ffffff; border-radius: 24px; padding: 24px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .main-title { font-size: 1.5rem; font-weight: 800; color: #0b2b4e; text-align: center; margin-bottom: 10px; }
+        .sub-title { text-align: center; color: #e67e22; font-weight: 700; margin-bottom: 20px; font-size: 1rem; }
+        
+        /* 口诀卡片 */
+        .mnemonic { background: #fff4d2; border-left: 4px solid #e67e22; padding: 16px; border-radius: 8px; font-weight: 700; color: #5a4500; line-height: 1.8; font-size: 1rem; margin-bottom: 20px; }
+        
+        /* 步骤卡片 */
+        .step-card { background: #f9fcff; border: 1px solid #e2eaf2; border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+        .step-title { font-size: 1.15rem; font-weight: 800; color: #1e6bb8; margin-bottom: 10px; border-bottom: 1px dashed #cbdae9; padding-bottom: 8px; }
+        .step-content { font-size: 1rem; color: #1e2a3a; line-height: 1.6; }
+        .step-content b { color: #c0392b; }
+        .step-content ul { padding-left: 20px; margin-top: 6px; }
+        .step-content li { margin-bottom: 6px; }
+
+        /* 折叠面板 */
+        details { background: #ffffff; border: 1px solid #e2eaf2; border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        summary { font-size: 1.05rem; font-weight: 800; color: #1e6bb8; cursor: pointer; outline: none; display: flex; align-items: center; justify-content: space-between; }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '➕'; font-size: 0.9rem; color: #6986a3; }
+        details[open] summary::after { content: '➖'; }
+        .detail-content { margin-top: 12px; font-size: 0.95rem; color: #4a637b; line-height: 1.6; border-top: 1px dashed #cbdae9; padding-top: 12px; }
+        
+        .detail-content p { margin-bottom: 8px; }
+        .detail-content .highlight { color: #1e6bb8; font-weight: 700; }
+        .detail-content .bad { color: #c0392b; font-weight: 700; }
+        .detail-content .good { color: #2e8b57; font-weight: 700; }
+        
+        /* 提示框 */
+        .notice { background: #eaf3fb; color: #1e6bb8; padding: 12px; border-radius: 10px; font-size: 0.95rem; margin-bottom: 16px; font-weight: 600; border-left: 4px solid #1e6bb8; }
+
+        .callout-box { background: #ffe8cc; border-left: 6px solid #e67e22; padding: 16px; border-radius: 12px; margin: 20px 0; }
+        .callout-box h3 { font-size: 1.05rem; color: #7a3c00; font-weight: 800; margin-bottom: 6px; }
+        .callout-box p { font-size: 0.95rem; color: #7a3c00; line-height: 1.5; margin-bottom: 12px;}
+
+        .back-btn { display: block; text-align: center; margin-top: 20px; color: #1e6bb8; text-decoration: none; font-weight: 700; padding: 12px; background: #eaf3fb; border-radius: 12px; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <h1 class="main-title">高压不上电 排查向导</h1>
+    <div class="sub-title">绿修技研 · READY不点亮实战 SOP</div>
+    
+    <!-- 核心口诀 -->
+    <div class="mnemonic">
+        📌 现场速记口诀：<br>
+        十二虚电最坑人，互锁通断分段寻；<br>
+        绝缘先拔负载件，别急拆包找原因；<br>
+        预充慢抬才合格，一冲就短后端寻；<br>
+        压差先查采样线，别拿均衡当万能。
+    </div>
+
+    <div class="notice">
+        🛡️ <b>安全前提：</b>高压不上电本质是自检条件不满足。所有高压测量必须下电、等待放电、验电；HVIL（互锁）属于低压信号，测量相对安全。
+    </div>
+
+    <!-- 标准排查步骤 -->
+    <div class="step-card">
+        <div class="step-title">🚀 标准化排查实操顺序（先易后难）</div>
+        <div class="step-content">
+            <ul>
+                <li><b>第一步：</b>读取全系统故障码（VCU、BMS、MCU、热管理），优先锁定故障域。</li>
+                <li><b>第二步：</b>确认基础条件：12V电压、P/N挡、刹车信号、无碰撞报警。</li>
+                <li><b>第三步：</b>外观目视：MSD、高压插头、检修盖板有无进水烧蚀。</li>
+                <li><b>第四步：</b>低压信号测量：HVIL回路通断、CAN电阻电压。</li>
+                <li><b>第五步：</b>BMS数据流：压差、温度、绝缘值、上电允许标志位。</li>
+                <li><b>第六步：</b>绝缘测试，分段隔离高压附件定位。</li>
+                <li><b>第七步：</b>预充动作观测、母线电压波形监测。</li>
+                <li><b>最后一步：</b>拆检电池包内部接触器、保险、采样线束。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 分类排查（折叠区） -->
+    <h2 style="font-size: 1.2rem; color: #0b2b4e; margin: 24px 0 12px 5px;">👇 点击展开：三大类故障深度解析</h2>
+
+    <details>
+        <summary>一、低压唤醒失败，控制器不在线</summary>
+        <div class="detail-content">
+            <p><b>现象：</b>仪表黑屏或只亮一下熄灭；诊断仪进不去系统；无继电器吸合声。</p>
+            <p><b>可能原因：</b>12V电瓶亏电虚电（最常见）、BMS/VCU供电保险烧、搭铁虚接、CAN总线短路/终端电阻丢失、防盗锁死。</p>
+            <p class="highlight">✅ 测量方法：</p>
+            <ul>
+                <li>按启动瞬间监测12V电压跌落（低于9V直接换电瓶）。</li>
+                <li>测VCU/BMS供电和搭铁电压降。</li>
+                <li>测整车CAN休眠电阻（60Ω），电压（H≈3.5V，L≈1.5V）。</li>
+            </ul>
+            <p><span class="bad">❌ 避坑：</span>动力电池有电就能上高压？错！12V是唤醒电源，高压再满小电瓶虚电也白搭。</p>
+            <p><span class="good">✅ 正解：</span>搭电时尽量用稳压电源，避免电压不稳烧低压采样。</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>二、低压正常，但禁止上电（无预充动作）</summary>
+        <div class="detail-content">
+            <p><b>现象：</b>仪表亮、能读码，但按启动没声音，直接报禁止上电。这是最常见的大类，分四个分支：</p>
+            <p><b>1. HVIL互锁断开：</b>MSD未装好、插头没插到底、针脚退针、检修盖开关未复位。<br>
+            <span class="highlight">测量：</span>断12V，用通断档分段测；测信号电压（闭环0V，断开5V，具体以图纸为准）。<br>
+            <span class="bad">❌ 避坑：</span>互锁直接短接交车？大错！</p>
+            
+            <p><b>2. 绝缘故障：</b>电池进水、线束磨破、附件击穿、插头残留清洗剂。<br>
+            <span class="highlight">测量：</span>兆欧表测DC+/-对PE，用分段隔离法逐个拔高压负载。<br>
+            <span class="bad">❌ 避坑：</span>绝缘低就拆电池包？一半以上是外部附件问题，先断开外接件隔离！</p>
+            
+            <p><b>3. BMS自检不通过：</b>单体压差大、极寒/高温、内部保险熔断、采样线虚接。<br>
+            <span class="highlight">测量：</span>读BMS数据流，对比实测总压。<br>
+            <span class="bad">❌ 避坑：</span>压差大就盲目均衡？如果内部铜排虚接，均衡会引发危险！</p>
+
+            <p><b>4. 整车使能条件不满足：</b>碰撞信号触发、刹车/档位信号异常、正在充电等。</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>三、有预充动作，但超时/失败</summary>
+        <div class="detail-content">
+            <p><b>现象：</b>听到继电器“咔哒”声，但母线电压不上升、上升慢或跌落，随后报故障。</p>
+            <p><b>可能原因：</b>预充电阻烧断/漂移、继电器触点烧蚀、主负不吸合、后端高压负载短路（如电容击穿）、BMS采样误判。</p>
+            <p class="highlight">✅ 测量方法：</p>
+            <ul>
+                <li>看母线电压曲线：正常缓慢抬升；不动=回路开路；瞬间拉满=主正粘连；一升就掉=后端短路。</li>
+                <li>测预充电阻阻值和继电器通断。</li>
+                <li>断开外部负载，单给电池包侧预充，区分故障侧。</li>
+            </ul>
+            <p><span class="bad">❌ 避坑：</span>预充失败直接换预充电阻？如果后端短路没排除，换上去立刻再烧！</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>四、偶发/间歇性不上电（冷车能上热车不行）</summary>
+        <div class="detail-content">
+            <p><b>可能原因：</b>12V电瓶内阻老化、HVIL针脚热胀冷缩虚接、高压插头针脚氧化、CAN线颠簸磨破搭铁、采样线受温度影响阻值漂移。</p>
+            <p class="highlight">✅ 测量要点：</p>
+            <p>必须在<b>冷态和热态</b>下分别复测HVIL通断、CAN电阻和12V压降，最容易抓出虚接点。</p>
+        </div>
+    </details>
+
+    <!-- 终极引流钩子 -->
+    <div class="callout-box">
+        <h3>⚠️ 遇到报文交互锁死，数据流看不懂？</h3>
+        <p>按上述步骤查了依然无法上电，往往涉及 VCU/BMS 底层控制逻辑与报文握手协议。这些核心策略在通用维修手册里是找不到的。</p>
+        <p><b>想系统掌握高压上电逻辑与底层排故思路？</b></p>
+        <a href="img/wechat-qr.jpg" style="display: block; text-align: center; background: #e67e22; color: white; text-decoration: none; font-weight: 700; padding: 12px; border-radius: 10px; font-size: 1rem;">保存二维码，加微信获取深度课程大纲</a>
+    </div>
+
+    <a href="index.html" class="back-btn">← 返回工具箱首页</a>
+</div>
+</body>
+</html>
