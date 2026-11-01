@@ -13,15 +13,27 @@
         .header h1 { font-size: 1.8rem; color: #0b2b4e; font-weight: 800; margin-bottom: 8px; }
         .header p { font-size: 1rem; color: #5e7a99; }
         
+        /* 版块标题 */
+        .section-title { font-size: 1.2rem; font-weight: 800; color: #1e6bb8; margin: 25px 0 15px 5px; display: flex; align-items: center; }
+        .section-title::before { content: ''; display: inline-block; width: 6px; height: 18px; background: #1e6bb8; border-radius: 3px; margin-right: 10px; }
+
+        /* 工具卡片 */
         .tool-card { background: #f9fcff; border: 1px solid #e2eaf2; border-radius: 20px; padding: 20px; margin-bottom: 16px; display: flex; align-items: center; text-decoration: none; color: inherit; transition: transform 0.1s; }
         .tool-card:active { transform: scale(0.98); background: #f0f6fc; }
-        .tool-icon { width: 50px; height: 50px; background: #1e6bb8; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: white; margin-right: 16px; }
+        .tool-icon { width: 50px; height: 50px; background: #1e6bb8; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: white; margin-right: 16px; flex-shrink: 0; }
         .tool-info h2 { font-size: 1.25rem; font-weight: 700; color: #0b2b4e; margin-bottom: 4px; }
         .tool-info p { font-size: 0.9rem; color: #6986a3; }
         
-        /* 引流区样式 */
+        /* 智囊卡片 (排故引导) - 用不同颜色区分 */
+        .guide-card { background: #fffaf0; border: 1px solid #f5e1b8; border-radius: 20px; padding: 20px; margin-bottom: 16px; display: flex; align-items: center; text-decoration: none; color: inherit; transition: transform 0.1s; }
+        .guide-card:active { transform: scale(0.98); background: #fff4d2; }
+        .guide-icon { width: 50px; height: 50px; background: #e67e22; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: white; margin-right: 16px; flex-shrink: 0; }
+        .guide-info h2 { font-size: 1.25rem; font-weight: 700; color: #7a3c00; margin-bottom: 4px; }
+        .guide-info p { font-size: 0.9rem; color: #a36b2b; }
+
+        /* 引流区 */
         .qr-section { display: flex; flex-direction: column; align-items: center; background: #f8fafc; padding: 20px; border-radius: 20px; margin-top: 30px; border: 1px solid #e2eaf2; }
-        .qr-tips { font-size: 0.95rem; color: #1e6bb8; font-weight: 700; margin-bottom: 10px; text-align: center; }
+        .qr-tips { font-size: 1rem; color: #1e6bb8; font-weight: 800; margin-bottom: 10px; text-align: center; }
         .qr-image { width: 160px; height: 160px; background: #eef2f6; border-radius: 16px; border: 2px dashed #cbd5e1; overflow: hidden; }
         .qr-image img { width: 100%; height: 100%; object-fit: contain; }
         .qr-caption { font-size: 0.9rem; color: #3b4e62; margin-top: 12px; font-weight: 500; text-align: center; line-height: 1.5; }
@@ -36,7 +48,9 @@
             <p>专为新能源维修师傅打造</p>
         </div>
 
-        <!-- 工具列表 -->
+        <!-- 第一部分：车间快算工具 -->
+        <div class="section-title">车间快算工具</div>
+
         <a href="jueyuan.html" class="tool-card">
             <div class="tool-icon">⚡</div>
             <div class="tool-info">
@@ -45,22 +59,42 @@
             </div>
         </a>
 
-               <!-- NTC温度速查工具 -->
         <a href="ntc.html" class="tool-card">
-            <div class="tool-icon" style="background: #e67e22;">🌡️</div>
+            <div class="tool-icon" style="background: #2ecc71;">🌡️</div>
             <div class="tool-info">
                 <h2>NTC温度阻值速查</h2>
                 <p>电池/电机/空调传感器阻值对照</p>
             </div>
         </a>
-        <!-- 电池压差计算器 -->
+
         <a href="yacha.html" class="tool-card">
-            <div class="tool-icon" style="background: #2ecc71;">🔋</div>
+            <div class="tool-icon" style="background: #9b59b6;">🔋</div>
             <div class="tool-info">
                 <h2>电池单体压差计算</h2>
                 <p>一秒算出压差，自动判定电池状态</p>
             </div>
         </a>
+
+        <!-- 第二部分：绿修排故智库 -->
+        <div class="section-title">绿修排故智库</div>
+
+        <a href="guide-dc.html" class="guide-card">
+            <div class="guide-icon">🔌</div>
+            <div class="guide-info">
+                <h2>直流快充故障排查</h2>
+                <p>CC1/CC2信号、CAN线、预充时序速查</p>
+            </div>
+        </a>
+
+        <!-- 预留：高压不上电引导 -->
+        <div class="guide-card" style="opacity: 0.5; pointer-events: none;">
+            <div class="guide-icon" style="background: #94a3b8;">🔑</div>
+            <div class="guide-info">
+                <h2>高压不上电排查</h2>
+                <p>即将上线，敬请期待...</p>
+            </div>
+        </div>
+
         <!-- 引流区 -->
         <div class="qr-section">
             <div class="qr-tips">💡 需要维修资料或技术咨询？</div>
