@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>绿修技研™ | 交流慢充故障排查向导</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px; color: #1e2a3a; }
+        .app-container { max-width: 600px; width: 100%; background: #ffffff; border-radius: 24px; padding: 24px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .main-title { font-size: 1.5rem; font-weight: 800; color: #0b2b4e; text-align: center; margin-bottom: 10px; }
+        .sub-title { text-align: center; color: #e67e22; font-weight: 700; margin-bottom: 20px; font-size: 1rem; }
+        
+        /* 步骤卡片 */
+        .step-card { background: #f9fcff; border: 1px solid #e2eaf2; border-radius: 16px; padding: 18px; margin-bottom: 16px; position: relative; }
+        .step-title { font-size: 1.15rem; font-weight: 800; color: #1e6bb8; margin-bottom: 10px; border-bottom: 1px dashed #cbdae9; padding-bottom: 8px; }
+        .step-content { font-size: 1rem; color: #1e2a3a; line-height: 1.6; }
+        .step-content b { color: #c0392b; }
+        
+        /* 表格样式 */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; background: #fff; }
+        .data-table th, .data-table td { border: 1px solid #dae5f0; padding: 8px; text-align: left; }
+        .data-table th { background: #eaf3fb; color: #1e6bb8; }
+        
+        /* 口诀卡片 */
+        .mnemonic { background: #fff4d2; border-left: 4px solid #e67e22; padding: 16px; border-radius: 8px; font-weight: 700; color: #5a4500; line-height: 1.8; font-size: 1rem; margin-bottom: 20px; }
+
+        /* 折叠面板 */
+        details { background: #f8fafc; border: 1px solid #e2eaf2; border-radius: 14px; padding: 12px 16px; margin-bottom: 16px; }
+        summary { font-size: 1rem; font-weight: 700; color: #1e6bb8; cursor: pointer; outline: none; }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: '▶'; font-size: 0.8rem; margin-right: 8px; }
+        details[open] summary::before { transform: rotate(90deg); display: inline-block; }
+        .detail-content { margin-top: 12px; font-size: 0.95rem; color: #4a637b; line-height: 1.6; border-top: 1px dashed #cbdae9; padding-top: 12px; }
+
+        /* 引流转化卡 */
+        .callout-box { background: #ffe8cc; border-left: 6px solid #e67e22; padding: 16px; border-radius: 12px; margin: 20px 0; }
+        .callout-box h3 { font-size: 1.05rem; color: #7a3c00; font-weight: 800; margin-bottom: 6px; }
+        .callout-box p { font-size: 0.95rem; color: #7a3c00; line-height: 1.5; margin-bottom: 12px;}
+
+        .back-btn { display: block; text-align: center; margin-top: 20px; color: #1e6bb8; text-decoration: none; font-weight: 700; padding: 12px; background: #eaf3fb; border-radius: 12px; }
+
+        /* ================= 全屏缩放弹窗样式 ================= */
+        #lightbox {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center;
+            overflow: hidden; cursor: zoom-out;
+        }
+        #lightbox-img-container {
+            width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;
+            transition: transform 0.1s ease-out; transform-origin: center center;
+        }
+        #lightbox-img {
+            max-width: 100%; max-height: 100%; object-fit: contain;
+            -webkit-user-drag: none; user-select: none;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <h1 class="main-title">交流慢充故障排查向导</h1>
+    <div class="sub-title">绿修技研 · OBC与引导信号实战 SOP</div>
+    
+    <!-- 现场口诀最醒目 -->
+    <div class="mnemonic">
+        📌 现场速记口诀：<br>
+        慢充重点查 CC 和 CP， OBC 唤醒是前提；<br>
+        CC 一千欧测电阻，CP 九伏六伏看占空；<br>
+        枪插一半不握手，锁枪电机常作怪；<br>
+        高压输出若没有，内部保险先瞅瞅。
+    </div>
+
+    <!-- 第1步 -->
+    <div class="step-card">
+        <div class="step-title">Step 1：区分是“桩不行”还是“车不行”</div>
+        <div class="step-content">
+            1. 换个随车充或慢充桩测试。<br>
+            2. 看仪表报什么错：是“已连接未充电”、“充电枪未锁止”还是“充电系统故障”。<br>
+            3. 重点读 OBC（车载充电机）故障码。
+        </div>
+    </div>
+
+    <!-- 第2步 -->
+    <div class="step-card">
+        <div class="step-title">Step 2：查连接确认 (CC 回路)</div>
+        <div class="step-content">
+            交流慢充枪有 7 个孔，CC 用于确认物理连接。<br>
+            拔枪测车端 CC↔PE 电阻：<b>应约为 1kΩ</b>（部分车型插枪后变为 500Ω）。<br>
+            如果电阻无穷大，说明没插紧、锁枪电机没动作、或线束断了。
+        </div>
+    </div>
+
+    <!-- 第3步 -->
+    <div class="step-card">
+        <div class="step-title">Step 3：查控制导引 (CP 回路) - 核心难点</div>
+        <div class="step-content">
+            CP 线负责传输 PWM 信号，告诉车能充多大电流。<br>
+            使用万用表直流档测 CP↔PE 电压（或示波器看占空比）：<br>
+            - <b>未插枪：</b>车端应有 <b>12V</b>。<br>
+            - <b>插枪未充电：</b>桩发波，车端应拉到 <b>9V</b> 左右。<br>
+            - <b>握手成功准备充电：</b>电压降至 <b>6V</b>。<br>
+            如果电压一直是 12V 不变，说明 OBC 没收到或没识别到 PWM 信号。
+        </div>
+    </div>
+
+    <!-- 第4步 -->
+    <div class="step-card">
+        <div class="step-title">Step 4：查 OBC 低压唤醒与高压输出 (⚠️ 高压安全)</div>
+        <div class="step-content">
+            1. 插枪后，OBC 应被唤醒（诊断仪能进 OBC 系统）。<br>
+            2. 如果 CC、CP 都正常，但 OBC 不输出高压，重点查 <b>OBC 内部保险丝</b>是否烧毁（交流慢充极高频故障）。<br>
+            3. 查 OBC 到电池包的直流高压母线是否断路。
+        </div>
+    </div>
+
+    <!-- 交流充电原理图（折叠） -->
+    <details>
+        <summary>点开查看：交流慢充 CC/CP 控制导引回路图</summary>
+        <div class="detail-content">
+            <img src="img/ac-circuit.jpg" style="width: 100%; border-radius: 8px; margin-bottom: 10px; cursor: pointer;" alt="交流充电控制导引原理图" onclick="openLightbox(this.src)">
+            <p style="font-size: 0.85rem; color: #94a3b8;">* 点击图片可全屏放大。观察 CP 信号从 12V → 9V → 6V 的跳变过程。</p>
+        </div>
+    </details>
+
+    <!-- 进阶测量数据表（折叠） -->
+    <details>
+        <summary>点开查看：交流慢充口 (GB/T 20234.2) 标准针脚数据</summary>
+        <div class="detail-content">
+            <p style="margin-bottom: 8px;"><b>常见引导信号电压/电阻参考：</b></p>
+            <table class="data-table">
+                <tr><th>测量点</th><th>状态</th><th>正常值 / 判定</th></tr>
+                <tr><td>车端 CC ↔ PE 电阻</td><td>拔枪</td><td>约 1kΩ</td></tr>
+                <tr><td>车端 CP ↔ PE 电压</td><td>拔枪</td><td>12V</td></tr>
+                <tr><td>车端 CP ↔ PE 电压</td><td>插枪(未充电)</td><td>9V 左右</td></tr>
+                <tr><td>车端 CP ↔ PE 电压</td><td>插枪(已握手)</td><td>6V 左右</td></tr>
+            </table>
+            <p style="margin-top: 12px; font-size: 0.85rem; color: #c0392b;"><b>⚠️ 注意：</b>如果锁枪机构损坏，CC 回路无法接通，车辆将不认枪。部分车型充电口电子锁在 12V 断电时无法拔出，需拉应急拉线。</p>
+        </div>
+    </details>
+
+    <!-- 终极引流钩子 -->
+    <div class="callout-box">
+        <h3>⚠️ OBC 报“内部故障”修不了？</h3>
+        <p>很多交流充不进电，最终查出来是 OBC 内部 PFC 电路损坏或 DCDC 模块击穿。厂家通常只换不修，但其实有维修降本方案。</p>
+        <p><b>想学习 OBC 内部板级维修与高压系统逻辑？</b></p>
+        <a href="img/wechat-qr.jpg" style="display: block; text-align: center; background: #e67e22; color: white; text-decoration: none; font-weight: 700; padding: 12px; border-radius: 10px; font-size: 1rem;">保存二维码，加微信获取深度课程大纲</a>
+    </div>
+
+    <a href="index.html" class="back-btn">← 返回工具箱首页</a>
+</div>
+
+<!-- ================= 支持双指缩放/拖动的全屏弹窗 ================= -->
+<div id="lightbox" onclick="closeLightbox(event)">
+    <div id="lightbox-img-container">
+        <img id="lightbox-img" src="" alt="预览大图">
+    </div>
+</div>
+
+<script>
+    let scale = 1;
+    let startDistance = 0;
+    let startScale = 1;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let translateX = 0, translateY = 0;
+    
+    const lightbox = document.getElementById('lightbox');
+    const imgContainer = document.getElementById('lightbox-img-container');
+    const img = document.getElementById('lightbox-img');
+
+    // 打开图片
+    function openLightbox(src) {
+        img.src = src;
+        lightbox.style.display = 'flex';
+        // 每次打开重置缩放和位置
+        scale = 1; translateX = 0; translateY = 0;
+        imgContainer.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
+    }
+
+    // 关闭弹窗（点击黑底关闭，但如果放大过就防止误触）
+    function closeLightbox(e) {
+        if (e && e.target.tagName === 'IMG') return;
+        if (scale > 1.05) return; 
+        lightbox.style.display = 'none';
+    }
+
+    // 触摸开始
+    imgContainer.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            startDistance = Math.hypot(
+                e.touches[0].pageX - e.touches[1].pageX,
+                e.touches[0].pageY - e.touches[1].pageY
+            );
+            startScale = scale;
+        } else if (e.touches.length === 1) {
+            isDragging = true;
+            startX = e.touches[0].clientX - translateX;
+            startY = e.touches[0].clientY - translateY;
+        }
+    }, { passive: false });
+
+    // 触摸移动
+    imgContainer.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (e.touches.length === 2) {
+            const distance = Math.hypot(
+                e.touches[0].pageX - e.touches[1].pageX,
+                e.touches[0].pageY - e.touches[1].pageY
+            );
+            const newScale = startScale * (distance / startDistance);
+            scale = Math.min(Math.max(1, newScale), 4);
+        } else if (e.touches.length === 1 && isDragging) {
+            translateX = e.touches[0].clientX - startX;
+            translateY = e.touches[0].clientY - startY;
+        }
+        imgContainer.style.transform = `scale(${scale}) translate(${translateX / scale}px, ${translateY / scale}px)`;
+    }, { passive: false });
+
+    // 触摸结束
+    imgContainer.addEventListener('touchend', () => {
+        isDragging = false;
+        if (scale <= 1.05) {
+            scale = 1; translateX = 0; translateY = 0;
+            imgContainer.style.transform = `scale(1) translate(0, 0)`;
+        }
+    });
+</script>
+</body>
+</html>
